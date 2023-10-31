@@ -4,10 +4,35 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Modal from "react-bootstrap/Modal";
-import { BiPaperPlane, BiCloudDownload } from "react-icons/bi";
+import { BiPaperPlane, BiCloudDownload, BiSave } from "react-icons/bi";
 import { generateInvoice } from "../utils";
 
-const InvoiceModal = (props:any) => {
+type Info = {
+  invoiceNumber: string;
+  billFrom: string;
+  billTo: string;
+  billToAddress: string;
+  billToEmail: string;
+  billFromAddress: string;
+  billFromEmail: string;
+  dateOfIssue: string;
+  notes: string;
+};
+
+type InvoiceProps = {
+  showModal: boolean;
+  closeModal: () => void;
+  info: Info;
+  currency: string;
+  items: any[];
+  total: string | number;
+  subTotal: string | number;
+  taxAmmount: string | number;
+  discountAmmount: string | number;
+  onSave: () => void;
+};
+
+const InvoiceModal = (props: InvoiceProps) => {
   const getInvoice = () => {
     return generateInvoice();
   };
@@ -67,9 +92,9 @@ const InvoiceModal = (props:any) => {
                 </tr>
               </thead>
               <tbody>
-                {props.items.map((item: any, i:number) => {
+                {props.items.map((item: any, i: number) => {
                   return (
-                    <tr id={''+i} key={i}>
+                    <tr id={"" + i} key={i}>
                       <td style={{ width: "70px" }}>{item.quantity}</td>
                       <td>
                         {item.name} - {item.description}
@@ -143,7 +168,7 @@ const InvoiceModal = (props:any) => {
         </div>
         <div className="pb-4 px-4">
           <Row>
-            <Col md={6}>
+            <Col md={4}>
               <Button
                 variant="primary"
                 className="d-block w-100"
@@ -156,7 +181,7 @@ const InvoiceModal = (props:any) => {
                 Send Invoice
               </Button>
             </Col>
-            <Col md={6}>
+            <Col md={4}>
               <Button
                 variant="outline-primary"
                 className="d-block w-100 mt-3 mt-md-0"
@@ -167,6 +192,19 @@ const InvoiceModal = (props:any) => {
                   className="me-2"
                 />
                 Download Copy
+              </Button>
+            </Col>
+            <Col md={4}>
+              <Button
+                variant="outline-primary"
+                className="d-block w-100 mt-3 mt-md-0"
+                onClick={props.onSave}
+              >
+                <BiSave
+                  style={{ width: "16px", height: "16px", marginTop: "-3px" }}
+                  className="me-2"
+                />
+                Save
               </Button>
             </Col>
           </Row>
