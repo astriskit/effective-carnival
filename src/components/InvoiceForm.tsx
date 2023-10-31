@@ -10,19 +10,7 @@ import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
 import { nanoid } from "@reduxjs/toolkit";
 import { AddInvoicePayload, EditInvoicePayload } from "../store/invoices";
-
-const parseIfString = (s: string | number, parseFn: (s: string) => number) => {
-  if (typeof s === "number") return s;
-  return parseFn(s);
-};
-
-const parseIfStringToFloat = (s: string | number) => {
-  return parseIfString(s, parseFloat);
-};
-
-const displayTwo = (s: string | number) => {
-  return parseIfStringToFloat(s).toFixed(2);
-};
+import { displayTwo } from "../utils";
 
 type InvoiceFormProps = {
   onSave(inv: AddInvoicePayload | EditInvoicePayload): void;
@@ -60,8 +48,8 @@ const InvoiceForm = (props: InvoiceFormProps) => {
   });
 
   const handleCalculateTotal = useCallback((s: typeof state) => {
-    var items = s.items;
-    var subTotal = 0;
+    const items = s.items;
+    let subTotal = 0;
 
     items?.forEach((item) => {
       subTotal = subTotal + item.price * item.quantity;
