@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { displayTwo, getInvoices, getTotal } from "../../utils";
+import { displayTwo, getInvoices, useInvoiceById } from "../../utils";
 import { InvoiceList } from "../../components/InvoiceList";
 import { Invoice } from "../../types/Invoice";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,10 @@ export const Dashboard = () => {
   const invoices = useSelector(getInvoices);
   const nav = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { getTotal } = useInvoiceById();
 
   const handleDisplayTotal = (invoiceId: InvoiceId) => {
-    const total = getTotal(invoiceId)({ invoices });
+    const total = getTotal(invoiceId);
     if (!total) throw new Error("Invalid Invoice Id");
 
     return `${total.currency} ${displayTwo(total.total)}`;

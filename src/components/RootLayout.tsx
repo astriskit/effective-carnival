@@ -14,9 +14,22 @@ export const RootLayout = () => {
     nav("/create");
   };
 
-  const heading =
-    pathname === "/create" ? "Create A New Invoice" : "Invoice List";
+  const getHeading = () => {
+    switch (pathname) {
+      case "/create":
+        return "Create A New Invoice";
+      case "/":
+        return "Invoice List";
+      default:
+        return "Dashboard";
+    }
+  };
 
+  const onBack = () => {
+    window.history.back();
+  };
+
+  const canGoBack = pathname !== "/";
   const isCreateActive = pathname === "/create";
   const isHomeActive = !isCreateActive;
 
@@ -29,9 +42,12 @@ export const RootLayout = () => {
         <Button onClick={onCreateNewInvoice} active={isCreateActive}>
           New
         </Button>
+        <Button onClick={onBack} disabled={!canGoBack}>
+          Go Back
+        </Button>
       </ButtonGroup>
       <main>
-        <h1>{heading}</h1>
+        <h1>{getHeading()}</h1>
         <Outlet />
       </main>
     </>

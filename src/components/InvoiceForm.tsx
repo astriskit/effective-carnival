@@ -5,23 +5,26 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import InputGroup from "react-bootstrap/InputGroup";
+import { nanoid } from "@reduxjs/toolkit";
+import { useSelector } from "react-redux";
 
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
-import { nanoid } from "@reduxjs/toolkit";
 import { AddInvoicePayload, EditInvoicePayload } from "../store/invoices";
-import { displayTwo } from "../utils";
+import { displayTwo, getInvoices } from "../utils";
+import { calcTotal } from "../utils/calcTotal";
 
 type InvoiceFormProps = {
   onSave(inv: AddInvoicePayload | EditInvoicePayload): void;
 };
 
 const InvoiceForm = (props: InvoiceFormProps) => {
+  const invoices = useSelector(getInvoices);
   const [state, setState] = useState({
     isOpen: false,
     currency: "$",
     currentDate: "",
-    invoiceNumber: 1,
+    invoiceNumber: invoices.length + 1,
     dateOfIssue: "",
     billTo: "",
     billToEmail: "",
@@ -47,23 +50,49 @@ const InvoiceForm = (props: InvoiceFormProps) => {
     ],
   });
 
-  const handleCalculateTotal = useCallback((s: typeof state) => {
-    const items = s.items;
-    let subTotal = 0;
+  const shapeInv = useCallback(
+    (overState: typeof state | null = null) => {
+      const fState = overState ?? state;
+      const dueDate = new Date(fState.dateOfIssue).valueOf();
 
-    items?.forEach((item) => {
-      subTotal = subTotal + item.price * item.quantity;
-    });
+      const shape = {
+        invNum: fState.invoiceNumber,
+        date: Date.now(),
+        dueDate,
+        to: {
+          name: fState.billTo,
+          email: fState.billToEmail,
+          address: fState.billToAddress,
+        },
+        from: {
+          name: fState.billFrom,
+          email: fState.billFromEmail,
+          address: fState.billFromAddress,
+        },
+        items: fState.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          qty: item.quantity,
+          price: item.price,
+        })),
+        currency: fState.currency,
+        taxRate: fState.taxRate,
+        discountRate: fState.discountRate,
+        notes: fState.notes,
+      };
 
-    const newState = {
-      ...s,
-      subTotal: subTotal,
-      taxAmmount: subTotal * (s.taxRate / 100),
-      discountAmmount: subTotal * (s.discountRate / 100),
-      total: subTotal - s.discountAmmount + s.taxAmmount,
-    };
-    return newState;
-  }, []);
+      return shape;
+    },
+    [state]
+  );
+
+  const handleCalculateTotal = useCallback(
+    (s: typeof state) => {
+      return calcTotal(shapeInv(s));
+    },
+    [shapeInv]
+  );
 
   const updateTotal = useCallback(() => {
     const newState = handleCalculateTotal(state);
@@ -75,12 +104,12 @@ const InvoiceForm = (props: InvoiceFormProps) => {
     ) {
       return;
     }
-    setState(newState);
-  }, [state]);
+    setState({ ...state, ...newState });
+  }, [state, handleCalculateTotal]);
 
   useEffect(() => {
     updateTotal();
-  }, [state]);
+  }, [state, updateTotal]);
 
   function handleRowDel(items: any) {
     const index = state.items.indexOf(items);
@@ -139,39 +168,6 @@ const InvoiceForm = (props: InvoiceFormProps) => {
 
   const closeModal = () => setState({ ...state, isOpen: false });
 
-  const shapeInv = () => {
-    const dueDate = new Date(state.dateOfIssue).valueOf();
-
-    const shape = {
-      invNum: state.invoiceNumber,
-      date: Date.now(),
-      dueDate,
-      to: {
-        name: state.billTo,
-        email: state.billToEmail,
-        address: state.billToAddress,
-      },
-      from: {
-        name: state.billFrom,
-        email: state.billFromEmail,
-        address: state.billFromAddress,
-      },
-      items: state.items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        qty: item.quantity,
-        price: item.price,
-      })),
-      currency: state.currency,
-      taxRate: state.taxRate,
-      discountRate: state.discountRate,
-      notes: state.notes,
-    };
-
-    return shape;
-  };
-
   const handleSave = () => {
     if (!props.onSave) return;
     const invDto = shapeInv();
@@ -210,13 +206,12 @@ const InvoiceForm = (props: InvoiceFormProps) => {
               <div className="d-flex flex-row align-items-center">
                 <span className="fw-bold me-2">Invoice&nbsp;Number:&nbsp;</span>
                 <Form.Control
-                  type="number"
+                  type="text"
                   value={state.invoiceNumber}
                   name={"invoiceNumber"}
                   onChange={editField}
-                  min="1"
                   style={{
-                    maxWidth: "70px",
+                    maxWidth: "200px",
                   }}
                   required
                 />
