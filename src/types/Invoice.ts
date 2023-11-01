@@ -3,7 +3,7 @@ import { Person } from "./Person";
 
 export type Invoice = {
   invoiceId: string;
-  invNum: number;
+  invNum: number | string;
   date: number;
   dueDate: number;
   to: Person;

@@ -1,4 +1,3 @@
-import React from "react";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
@@ -8,7 +7,7 @@ import { BiPaperPlane, BiCloudDownload, BiSave } from "react-icons/bi";
 import { generateInvoice } from "../utils";
 
 type Info = {
-  invoiceNumber: string;
+  invoiceNumber: string | number;
   billFrom: string;
   billTo: string;
   billToAddress: string;
@@ -16,6 +15,7 @@ type Info = {
   billFromAddress: string;
   billFromEmail: string;
   dateOfIssue: string;
+  dueDate: string;
   notes: string;
 };
 
@@ -29,13 +29,17 @@ type InvoiceProps = {
   subTotal: string | number;
   taxAmmount: string | number;
   discountAmmount: string | number;
-  onSave: () => void;
+  onSave?: () => void;
+  onSend?: () => void;
 };
 
 const InvoiceModal = (props: InvoiceProps) => {
   const getInvoice = () => {
     return generateInvoice();
   };
+
+  const showSave = !!props?.onSave;
+  const showSend = !!props?.onSend;
 
   return (
     <div>
@@ -45,7 +49,7 @@ const InvoiceModal = (props: InvoiceProps) => {
         size="lg"
         centered
       >
-        <div id="invoiceCapture">
+        <div id="invoiceCapture" className="pt-1">
           <div className="d-flex flex-row justify-content-between align-items-start bg-light w-100 p-4">
             <div className="w-100">
               <h4 className="fw-bold my-2">
@@ -80,6 +84,8 @@ const InvoiceModal = (props: InvoiceProps) => {
               <Col md={4}>
                 <div className="fw-bold mt-2">Date Of Issue:</div>
                 <div>{props.info.dateOfIssue || ""}</div>
+                <div className="fw-bold mt-2">Due on:</div>
+                <div>{props.info.dueDate || ""}</div>
               </Col>
             </Row>
             <Table className="mb-0">
@@ -167,20 +173,22 @@ const InvoiceModal = (props: InvoiceProps) => {
           </div>
         </div>
         <div className="pb-4 px-4">
-          <Row>
-            <Col md={4}>
-              <Button
-                variant="primary"
-                className="d-block w-100"
-                onClick={getInvoice}
-              >
-                <BiPaperPlane
-                  style={{ width: "15px", height: "15px", marginTop: "-3px" }}
-                  className="me-2"
-                />
-                Send Invoice
-              </Button>
-            </Col>
+          <Row style={{ justifyContent: "center" }}>
+            {showSend && (
+              <Col md={4}>
+                <Button
+                  variant="primary"
+                  className="d-block w-100"
+                  onClick={getInvoice}
+                >
+                  <BiPaperPlane
+                    style={{ width: "15px", height: "15px", marginTop: "-3px" }}
+                    className="me-2"
+                  />
+                  Send Invoice
+                </Button>
+              </Col>
+            )}
             <Col md={4}>
               <Button
                 variant="outline-primary"
@@ -194,19 +202,21 @@ const InvoiceModal = (props: InvoiceProps) => {
                 Download Copy
               </Button>
             </Col>
-            <Col md={4}>
-              <Button
-                variant="outline-primary"
-                className="d-block w-100 mt-3 mt-md-0"
-                onClick={props.onSave}
-              >
-                <BiSave
-                  style={{ width: "16px", height: "16px", marginTop: "-3px" }}
-                  className="me-2"
-                />
-                Save
-              </Button>
-            </Col>
+            {showSave && (
+              <Col md={4}>
+                <Button
+                  variant="outline-primary"
+                  className="d-block w-100 mt-3 mt-md-0"
+                  onClick={props.onSave}
+                >
+                  <BiSave
+                    style={{ width: "16px", height: "16px", marginTop: "-3px" }}
+                    className="me-2"
+                  />
+                  Save
+                </Button>
+              </Col>
+            )}
           </Row>
         </div>
       </Modal>

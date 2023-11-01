@@ -3,3 +3,4 @@ export * from "./hooks";
 
 export * from "./generateInvoice";
 export * from "./displayTwo";
+export * from './formateDate'

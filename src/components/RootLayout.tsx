@@ -14,6 +14,12 @@ export const RootLayout = () => {
     nav("/create");
   };
 
+  const onInfo = () => {
+    window.alert(
+      "Welcome. You may create invoices for free on this site, that'll stay with you until you clear them. :)"
+    );
+  };
+
   const getHeading = () => {
     let heading = "";
     switch (pathname) {
@@ -55,6 +61,9 @@ export const RootLayout = () => {
         </Button>
         <Button onClick={onBack} disabled={!canGoBack}>
           Go Back
+        </Button>
+        <Button variant="info" onClick={onInfo}>
+          ?
         </Button>
       </ButtonGroup>
       <main>

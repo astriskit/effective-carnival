@@ -10,7 +10,6 @@ type InvoiceListProps = {
   items: Invoice[];
   onEdit: (itemId: InvoiceId) => unknown;
   onRemove: (itemId: InvoiceId) => unknown;
-  onDownload: (itemId: InvoiceId) => unknown;
   onView: (itemId: InvoiceId) => unknown;
   onExtend: (itemId: InvoiceId) => unknown;
   onDisplayTotal: (itemId: InvoiceId) => string;
@@ -27,7 +26,9 @@ export const InvoiceList = (props: InvoiceListProps) => {
           <th>Billee</th>
           <th>Biller</th>
           <th>Amount</th>
-          <th colSpan={4} style={{textAlign: 'center'}}>Actions</th>
+          <th colSpan={4} style={{ textAlign: "center" }}>
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -38,13 +39,10 @@ export const InvoiceList = (props: InvoiceListProps) => {
               <td>{item.to.email}</td>
               <td>{item.from.email}</td>
               <td>{props.onDisplayTotal(item.invoiceId)}</td>
-              <td style={{textAlign: 'center'}}>
+              <td style={{ textAlign: "center" }}>
                 <ButtonGroup size="sm">
                   <Button onClick={() => props.onView(item.invoiceId)}>
-                    Preview
-                  </Button>
-                  <Button onClick={() => props.onRemove(item.invoiceId)} variant="danger">
-                    Delete
+                    View
                   </Button>
                   <Button onClick={() => props.onEdit(item.invoiceId)}>
                     Edit
@@ -52,8 +50,11 @@ export const InvoiceList = (props: InvoiceListProps) => {
                   <Button onClick={() => props.onExtend(item.invoiceId)}>
                     Extend
                   </Button>
-                  <Button onClick={() => props.onDownload(item.invoiceId)}>
-                    Download
+                  <Button
+                    onClick={() => props.onRemove(item.invoiceId)}
+                    variant="danger"
+                  >
+                    Delete
                   </Button>
                 </ButtonGroup>
               </td>

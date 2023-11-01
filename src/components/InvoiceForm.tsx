@@ -6,12 +6,11 @@ import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import InputGroup from "react-bootstrap/InputGroup";
 import { nanoid } from "@reduxjs/toolkit";
-import { useSelector } from "react-redux";
 
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
 import { AddInvoicePayload, EditInvoicePayload } from "../store/invoices";
-import { displayTwo, getInvoices } from "../utils";
+import { displayTwo, formatDate } from "../utils";
 import { calcTotal } from "../utils/calcTotal";
 import { Invoice } from "../types/Invoice";
 
@@ -24,17 +23,13 @@ type InvoiceFormProps = {
   mode?: Mode;
 };
 
-const initialiseState = (
-  s: Prefill,
-  invoiceNumber: string | number,
-  mode: Mode
-) => {
+const initialiseState = (s: Prefill, mode: Mode) => {
   if (!mode) {
     return {
       isOpen: false,
       currency: "$",
       currentDate: Date.now(),
-      invoiceNumber: invoiceNumber,
+      invoiceNumber: "",
       dateOfIssue: undefined,
       billTo: "",
       billToEmail: "",
@@ -66,8 +61,8 @@ const initialiseState = (
   return {
     isOpen: false,
     currency: s?.currency ?? "$",
-    currentDate: mode === "extend" ? Date.now() : s?.createdAt,
-    invoiceNumber: mode === "extend" ? invoiceNumber : s.invNum,
+    currentDate: mode === "extend" ? Date.now() : s?.date,
+    invoiceNumber: mode === "extend" ? "" : s.invNum,
     dateOfIssue: mode === "extend" ? undefined : s.dueDate,
     billTo: s?.to?.name ?? "",
     billToEmail: s?.to?.email ?? "",
@@ -93,9 +88,8 @@ const initialiseState = (
 };
 
 const InvoiceForm = (props: InvoiceFormProps) => {
-  const invoices = useSelector(getInvoices);
   const [state, setState] = useState(() =>
-    initialiseState(props.prefill, invoices.length + 1, props.mode)
+    initialiseState(props.prefill, props.mode)
   );
 
   const shapeInv = useCallback(
@@ -219,12 +213,6 @@ const InvoiceForm = (props: InvoiceFormProps) => {
     const invDto = shapeInv();
     // @ts-ignore FIX_ME
     props.onSave(invDto);
-  };
-
-  const formatDate = (date: number | undefined) => {
-    if (!date) return "";
-    const dt = new Date(date);
-    return `${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
   };
 
   return (
@@ -413,8 +401,11 @@ const InvoiceForm = (props: InvoiceFormProps) => {
             <InvoiceModal
               showModal={state.isOpen}
               closeModal={closeModal}
-              //@ts-ignore FIX_ME
-              info={state}
+              info={{
+                ...state,
+                dueDate: formatDate(state.dateOfIssue),
+                dateOfIssue: formatDate(state.currentDate),
+              }}
               items={state.items}
               currency={state.currency}
               subTotal={displayTwo(state.subTotal)}
