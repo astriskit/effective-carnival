@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { Invoice } from "../types/Invoice";
+import Card from "react-bootstrap/Card";
 
 type InvoiceId = Invoice["invoiceId"];
 
@@ -18,8 +19,16 @@ type InvoiceListProps = {
 export const InvoiceList = (props: InvoiceListProps) => {
   const { items } = props;
 
+  if (!items.length) {
+    return (
+      <Card style={{ marginBottom: 10 }}>
+        <Card.Body>No invoices found. Feel free to create one.</Card.Body>
+      </Card>
+    );
+  }
+
   return (
-    <Table responsive striped>
+    <Table responsive striped style={{ marginBottom: 10 }}>
       <thead>
         <tr>
           <th>Invoice</th>
