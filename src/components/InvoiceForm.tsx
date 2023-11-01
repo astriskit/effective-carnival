@@ -13,52 +13,99 @@ import InvoiceModal from "./InvoiceModal";
 import { AddInvoicePayload, EditInvoicePayload } from "../store/invoices";
 import { displayTwo, getInvoices } from "../utils";
 import { calcTotal } from "../utils/calcTotal";
+import { Invoice } from "../types/Invoice";
+
+type Prefill = Invoice | null | undefined;
+type Mode = "extend" | "update" | undefined;
 
 type InvoiceFormProps = {
   onSave(inv: AddInvoicePayload | EditInvoicePayload): void;
+  prefill: Prefill;
+  mode?: Mode;
 };
 
-const InvoiceForm = (props: InvoiceFormProps) => {
-  const invoices = useSelector(getInvoices);
-  const [state, setState] = useState({
+const initialiseState = (
+  s: Prefill,
+  invoiceNumber: string | number,
+  mode: Mode
+) => {
+  if (!mode) {
+    return {
+      isOpen: false,
+      currency: "$",
+      currentDate: Date.now(),
+      invoiceNumber: invoiceNumber,
+      dateOfIssue: undefined,
+      billTo: "",
+      billToEmail: "",
+      billToAddress: "",
+      billFrom: "",
+      billFromEmail: "",
+      billFromAddress: "",
+      notes: "",
+      taxRate: 0,
+      discountRate: 0,
+      total: 0.0,
+      subTotal: 0.0,
+      taxAmmount: 0.0,
+      discountAmmount: 0.0,
+      items: [
+        {
+          id: nanoid(),
+          name: "",
+          description: "",
+          price: 1.0,
+          quantity: 1,
+        },
+      ],
+    };
+  }
+
+  if (!s) throw new Error("Prefill is empty");
+
+  return {
     isOpen: false,
-    currency: "$",
-    currentDate: "",
-    invoiceNumber: invoices.length + 1,
-    dateOfIssue: "",
-    billTo: "",
-    billToEmail: "",
-    billToAddress: "",
-    billFrom: "",
-    billFromEmail: "",
-    billFromAddress: "",
-    notes: "",
+    currency: s?.currency ?? "$",
+    currentDate: mode === "extend" ? Date.now() : s?.createdAt,
+    invoiceNumber: mode === "extend" ? invoiceNumber : s.invNum,
+    dateOfIssue: mode === "extend" ? undefined : s.dueDate,
+    billTo: s?.to?.name ?? "",
+    billToEmail: s?.to?.email ?? "",
+    billToAddress: s?.to?.address ?? "",
+    billFrom: s?.from?.name ?? "",
+    billFromEmail: s?.from?.email ?? "",
+    billFromAddress: s?.from?.address ?? "",
+    notes: s?.notes ?? "",
+    items: s.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      quantity: item.qty,
+      price: item.price,
+    })),
     taxRate: 0,
     discountRate: 0,
     total: 0.0,
     subTotal: 0.0,
     taxAmmount: 0.0,
     discountAmmount: 0.0,
-    items: [
-      {
-        id: nanoid(),
-        name: "",
-        description: "",
-        price: 1.0,
-        quantity: 1,
-      },
-    ],
-  });
+  };
+};
+
+const InvoiceForm = (props: InvoiceFormProps) => {
+  const invoices = useSelector(getInvoices);
+  const [state, setState] = useState(() =>
+    initialiseState(props.prefill, invoices.length + 1, props.mode)
+  );
 
   const shapeInv = useCallback(
     (overState: typeof state | null = null) => {
       const fState = overState ?? state;
-      const dueDate = new Date(fState.dateOfIssue).valueOf();
 
       const shape = {
         invNum: fState.invoiceNumber,
-        date: Date.now(),
-        dueDate,
+        date: fState.currentDate,
+        dueDate: fState.dateOfIssue,
         to: {
           name: fState.billTo,
           email: fState.billToEmail,
@@ -150,7 +197,6 @@ const InvoiceForm = (props: InvoiceFormProps) => {
   }
 
   const editField = (event: any) => {
-    console.log(event.target.name, event.target.value, "edit-field");
     setState({
       ...state,
       [event.target.name]: event.target.value,
@@ -171,7 +217,14 @@ const InvoiceForm = (props: InvoiceFormProps) => {
   const handleSave = () => {
     if (!props.onSave) return;
     const invDto = shapeInv();
+    // @ts-ignore FIX_ME
     props.onSave(invDto);
+  };
+
+  const formatDate = (date: number | undefined) => {
+    if (!date) return "";
+    const dt = new Date(date);
+    return `${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
   };
 
   return (
@@ -185,7 +238,7 @@ const InvoiceForm = (props: InvoiceFormProps) => {
                   <div className="mb-2">
                     <span className="fw-bold">Current&nbsp;Date:&nbsp;</span>
                     <span className="current-date">
-                      {new Date().toLocaleDateString()}
+                      {new Date(state.currentDate).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -193,7 +246,7 @@ const InvoiceForm = (props: InvoiceFormProps) => {
                   <span className="fw-bold d-block me-2">Due&nbsp;Date:</span>
                   <Form.Control
                     type="date"
-                    value={state.dateOfIssue}
+                    value={formatDate(state.dateOfIssue)}
                     name={"dateOfIssue"}
                     onChange={editField}
                     style={{

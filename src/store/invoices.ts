@@ -37,7 +37,7 @@ const invoicesSlice = createSlice({
         if (!inv) throw new Error("Invalid invoice id");
         Object.assign(inv, action.payload);
       },
-      prepare: (_, invId: string, action: EditInvoicePayload) => ({
+      prepare: (invId: string, action: EditInvoicePayload) => ({
         payload: {
           ...action,
           invoiceId: invId,

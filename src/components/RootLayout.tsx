@@ -15,14 +15,25 @@ export const RootLayout = () => {
   };
 
   const getHeading = () => {
+    let heading = "";
     switch (pathname) {
       case "/create":
-        return "Create A New Invoice";
+        heading = "Create A New Invoice";
+        break;
       case "/":
-        return "Invoice List";
-      default:
-        return "Dashboard";
+        heading = "Invoice List";
+        break;
     }
+
+    if (pathname.includes("edit")) {
+      heading = "Update Invoice";
+    } else if (pathname.includes("preview")) {
+      heading = "View Invoice";
+    } else if (pathname.includes("extend")) {
+      heading = "Make Invoice Like";
+    }
+
+    return heading;
   };
 
   const onBack = () => {
