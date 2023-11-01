@@ -8,9 +8,9 @@ An Invoice creator project built with React. Add itemized items, configure quant
 
 Store the created invoices locally, display a list of these invoices, and provide options to view, edit, and delete them.
 
-### Live Demo
+### Live
 
-https://invoice-generator-react.netlify.app/
+https://astriskit.github.io/effective-carnival/
 
 ### Setup for running locally
 
