@@ -66,9 +66,28 @@ export const RootLayout = () => {
           ?
         </Button>
       </ButtonGroup>
-      <main>
+      <main
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <h1>{getHeading()}</h1>
         <Outlet />
+        <footer
+          style={{
+            display: "flex",
+            alignSelf: "flex-end",
+            justifyContent: "center",
+          }}
+        >
+          <p style={{ fontSize: "12px" }}>
+            Made with <span style={{ color: "red" }}>❤️</span> by&nbsp;
+            <a href="https://astriskit-portfolio.wordpress.com/">astriskit</a>
+          </p>
+        </footer>
       </main>
     </>
   );

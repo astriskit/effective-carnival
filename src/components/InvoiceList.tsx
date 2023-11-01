@@ -36,8 +36,32 @@ export const InvoiceList = (props: InvoiceListProps) => {
           return (
             <tr key={item.invoiceId}>
               <td>{item.invNum}</td>
-              <td>{item.to.email}</td>
-              <td>{item.from.email}</td>
+              <td>
+                <Button
+                  variant="link"
+                  href={`mailto:${item.to.email}`}
+                  size="sm"
+                  style={{
+                    padding: 0,
+                  }}
+                  title={item.to.email}
+                >
+                  {item.to.name}
+                </Button>
+              </td>
+              <td>
+                <Button
+                  variant="link"
+                  href={`mailto:${item.from.email}`}
+                  size="sm"
+                  style={{
+                    padding: 0,
+                  }}
+                  title={item.from.email}
+                >
+                  {item.from.name}
+                </Button>
+              </td>
               <td>{props.onDisplayTotal(item.invoiceId)}</td>
               <td style={{ textAlign: "center" }}>
                 <ButtonGroup size="sm">
